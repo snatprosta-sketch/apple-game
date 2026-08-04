@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>apple v2 - MelBet Style</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: #111827;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    /* Асосии бозӣ */
+    .game-card {
+      background: #1f2937;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      padding: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid #374151;
+      position: relative;
+    }
+
+    /* Хатти болоӣ: Настройки ва Помощь */
+    .top-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn-icon {
+      background: #374151;
+      color: #facc15;
+      border: 1px solid #4b5563;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-help {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      background: #0f172a;
+      padding: 10px 15px;
+      border-radius: 10px;
+    }
+    .logo { font-size: 20px; font-weight: bold; color: #facc15; }
+    .balance-box { font-size: 14px; color: #9ca3af; }
+    .balance-val { color: #10b981; font-weight: bold; }
+
+    .wallet-section { display: flex; gap: 10px; margin-bottom: 15px; }
+    .btn-wallet {
+      flex: 1; padding: 10px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: bold; color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-deposit { background: #10b981; }
+    .btn-withdraw { background: #ef4444; }
+
+    .apple-grid {
+      display: flex; flex-direction: column-reverse; gap: 8px;
+      margin-bottom: 15px; background: url('bg.jpg') center/cover no-repeat;
+      padding: 12px; border-radius: 16px; border: 1px solid #334155;
+    }
+    .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; opacity: 0.4; pointer-events: none; }
+    .row.active { opacity: 1; pointer-events: auto; }
+    .row.completed { opacity: 0.8; pointer-events: none; }
+    .cell {
+      background: rgba(15, 23, 42, 0.65); border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%; width: 100%; aspect-ratio: 1 / 1;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .controls { display: flex; flex-direction: column; gap: 10px; }
+    .game-input {
+      background: #0f172a; border: 1px solid #374151; border-radius: 8px;
+      padding: 10px; color: #fff; font-size: 16px; text-align: center; outline: none;
+    }
+    .btn-action { padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; background: #10b981; color: white; }
+    .btn-cashout { background: #facc15; color: #000; }
+    .status { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 5px; }
+
+    /* Окнои Настройки */
+    .settings-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95); z-index: 2000; overflow-y: auto; padding: 15px;
+      justify-content: center; align-items: flex-start;
+    }
+    .settings-card {
+      background: #1f2937; border: 1px solid #374151; border-radius: 16px;
+      width: 100%; max-width: 400px; padding: 15px; margin-top: 20px;
+    }
+    .settings-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 12px; border-bottom: 1px solid #374151; margin-bottom: 15px;
+    }
+    .settings-header h2 { font-size: 18px; color: #fff; }
+    .btn-close { background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
+
+    .user-profile-box {
+      background: #0f172a; padding: 12px; border-radius: 12px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 15px;
+    }
+    .user-avatar { font-size: 30px; }
+    .user-info div:first-child { font-weight: bold; color: #fff; font-size: 15px; }
+    .user-info div:last-child { color: #facc15; font-size: 13px; font-weight: bold; }
+
+    .settings-group {
+      background: #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 15px;
+    }
+    .settings-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 15px; border-bottom: 1px solid #1e293b; cursor: pointer; font-size: 14px;
+    }
+    .settings-item:last-child { border-bottom: none; }
+    .settings-item-left { display: flex; align-items: center; gap: 10px; }
+    .settings-item-right { color: #9ca3af; font-size: 12px; }
+
+    .btn-logout-settings {
+      width: 100%; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444;
+      padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;
+    }
+
+    /* Модалҳо */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; z-index: 3000; padding: 15px;
+    }
+    .modal-card { background: #1f2937; border: 1px solid #374151; border-radius: 16px; padding: 20px; width: 100%; max-width: 380px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="game-card">
+  <!-- Тугмаҳои Болоӣ -->
+  <div class="top-action-bar">
+    <button class="btn-icon btn-help" onclick="openModal('helpModal')">🆘 Помощь</button>
+    <button class="btn-icon" onclick="openSettings()">⚙️ Настройки</button>
+  </div>
+
+  <div class="top-bar">
+    <div class="logo">🍏 apple v2</div>
+    <div class="balance-box">Баланс: <span id="balance" class="balance-val">100</span> смн</div>
+  </div>
+
+  <div class="wallet-section">
+    <button class="btn-wallet btn-deposit" onclick="openModal('depositModal')">➕ Депозит</button>
+    <button class="btn-wallet btn-withdraw" onclick="withdrawMoney()">💸 Вывод</button>
+  </div>
+
+  <div class="apple-grid" id="grid"></div>
+
+  <div class="controls">
+    <input type="number" class="game-input" id="betInput" value="5" min="5" placeholder="Ставка (мин. 5 смн)">
+    <button id="mainBtn" class="btn-action" onclick="handleGame()">Старт</button>
+  </div>
+  <div class="status" id="statusText">Введите ставку и начните игру</div>
+</div>
+
+<!-- Окнои Настройки -->
+<div class="settings-overlay" id="settingsModal">
+  <div class="settings-card">
+    <div class="settings-header">
+      <h2>Настройки</h2>
+      <button class="btn-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="user-profile-box">
+      <div class="user-avatar">👤</div>
+      <div class="user-info">
+        <div>Игрок #1</div>
+        <div>ID: 84920153</div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-item" onclick="alert('Профиль защищен')">
+        <div class="settings-item-left">🛡️ Настройки безопасности</div>
+        <div class="settings-item-right">›</div>
+      </div>
+      <div class="settings-item" onclick="alert('Пин-код не задан')">
+        <div class="settings-item-left">🔑 Пин-код и биометрия</div>
+        <div class="settings-item-right">›</div>
+      </div>
+      <div class="settings-item" onclick="alert('Активная сессия: Android (Dushanbe)')">
+        <div class="settings-item-left">📱 История авторизаций</div>
+        <div class="settings-item-right">›</div>
+      </div>
+      <div class="settings-item" onclick="alert('Язык: Русский')">
+        <div class="settings-item-left">🌐 Выберите язык</div>
+        <div class="settings-item-right">Русский ›</div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-item" onclick="clearCache()">
+        <div class="settings-item-left">🧹 Очистить кэш</div>
+        <div class="settings-item-right" id="cacheSize">49.9 МБ</div>
+      </div>
+      <div class="settings-item" onclick="shareApp()">
+        <div class="settings-item-left">🔗 Поделиться приложением</div>
+        <div class="settings-item-right">›</div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-item-left">ℹ️ Версия приложения</div>
+        <div class="settings-item-right">MelBet v.255.0.6</div>
+      </div>
+    </div>
+
+    <button class="btn-logout-settings" onclick="logout()">
+      🚪 Выйти из аккаунта
+    </button>
+  </div>
+</div>
+
+<!-- Модали Помощь -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-card">
+    <h3 style="color:#facc15; margin-bottom:10px;">Служба поддержки 🛠️</h3>
+    <p style="font-size:14px; color:#d1d5db; margin-bottom:15px;">По вопросам пополнения баланса и вывода средств пишите администратору:</p>
+    <a href="https://t.me/username" target="_blank" style="display:block; background:#0088cc; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight:bold; margin-bottom:10px;">💬 Написать в Telegram</a>
+    <button onclick="closeModal('helpModal')" style="background:#4b5563; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Закрыть</button>
+  </div>
+</div>
+
+<!-- Модали Депозит -->
+<div class="modal-overlay" id="depositModal">
+  <div class="modal-card">
+    <h3 style="color:#facc15; margin-bottom:10px;">Пополнение баланса</h3>
+    <p style="font-size:13px; color:#9ca3af; margin-bottom:10px;">Переведите сумму на карту DC Next: <b>9762 0001 2684 9958</b></p>
+    <button onclick="closeModal('depositModal')" style="background:#4b5563; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Закрыть</button>
+  </div>
+</div>
+
+<script>
+  let balance = 100;
+  let currentBet = 0;
+  let currentRow = 0;
+  let isGameRunning = false;
+  
+  const multipliers = [1.23, 1.54, 1.93, 2.89, 4.33, 6.50, 16.25, 40.62, 101.56, 450.00, 2249.20];
+  
+  const gridEl = document.getElementById('grid');
+  const balanceEl = document.getElementById('balance');
+  const statusEl = document.getElementById('statusText');
+  const mainBtn = document.getElementById('mainBtn');
+  const betInput = document.getElementById('betInput');
+
+  let gridData = [];
+
+  function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+  function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+  
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  function clearCache() {
+    document.getElementById('cacheSize').textContent = '0 МБ';
+    alert('Кэш успешно очищен!');
+  }
+
+  function shareApp() {
+    if (navigator.share) {
+      navigator.share({ title: 'apple v2', url: window.location.href });
+    } else {
+      alert('Ссылка скопирована!');
+    }
+  }
+
+  function logout() {
+    if(confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+      alert('Вы вышли из аккаунта.');
+      closeSettings();
+    }
+  }
+
+  function updateBalanceDisplay() {
+    balanceEl.textContent = balance.toFixed(0);
+  }
+
+  function withdrawMoney() {
+    alert('Для вывода средств обратитесь в службу поддержки.');
+  }
+
+  function initBoard() {
+    gridEl.innerHTML = '';
+    for (let r = 0; r < 11; r++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = `row row-${r}`;
+      for (let c = 0; c < 5; c++) {
+        const cellDiv = document.createElement('div');
+        cellDiv.className = 'cell';
+        cellDiv.textContent = '❓';
+        cellDiv.onclick = () => selectCell(r, c);
+        rowDiv.appendChild(cellDiv);
+      }
+      gridEl.appendChild(rowDiv);
+    }
+  }
+
+  function handleGame() {
+    if (!isGameRunning) startGame();
+    else cashOut();
+  }
+
+  function startGame() {
+    currentBet = parseFloat(betInput.value);
+    if (isNaN(currentBet) || currentBet < 5) { alert("Минимальная ставка 5 сомони!"); return; }
+    if (currentBet > balance) { alert("Недостаточно средств!"); return; }
+
+    balance -= currentBet;
+    updateBalanceDisplay();
+    isGameRunning = true;
+    currentRow = 0;
+
+    gridData = [];
+    for (let r = 0; r < 11; r++) {
+      let badCount = (r >= 9) ? 4 : (r >= 6) ? 3 : (r >= 3) ? 2 : 1;
+      let rowArray = Array(5).fill('🍏');
+      let badsPlaced = 0;
+      while (badsPlaced < badCount) {
+        let randIdx = Math.floor(Math.random() * 5);
+        if (rowArray[randIdx] !== '🍎') {
+          rowArray[randIdx] = '🍎';
+          badsPlaced++;
+        }
+      }
+      gridData.push(rowArray);
+    }
+
+    initBoard();
+    updateRows();
+    mainBtn.textContent = `Забрать (0 смн)`;
+    mainBtn.className = "btn-action btn-cashout";
+    betInput.disabled = true;
+    statusEl.textContent = `Выберите ячейку в 1 ряду`;
+  }
+
+  function updateRows() {
+    const rows = document.querySelectorAll('.row');
+    rows.forEach((row, idx) => {
+      row.className = 'row';
+      if (idx < currentRow) row.classList.add('completed');
+      if (idx === currentRow) row.classList.add('active');
+    });
+  }
+
+  /* Нишон додани ҳамаи себҳо пас аз бохт ё бурд */
+  function showAllGrid() {
+    const rows = document.querySelectorAll('.row');
+    rows.forEach((rowEl, rIdx) => {
+      const cells = rowEl.children;
+      for (let cIdx = 0; cIdx < 5; cIdx++) {
+        if (cells[cIdx].textContent === '❓') {
+          cells[cIdx].textContent = gridData[rIdx][cIdx];
+          cells[cIdx].style.opacity = '0.6';
+        }
+      }
+    });
+  }
+
+  function selectCell(row, col) {
+    if (row !== currentRow || !isGameRunning) return;
+    const rowEl = document.querySelectorAll('.row')[row];
+    const cellEl = rowEl.children[col];
+    const result = gridData[row][col];
+
+    cellEl.textContent = result;
+
+    if (result === '🍎') {
+      statusEl.textContent = "Вы попали на огрызок! Игра окончена.";
+      showAllGrid(); // Нишон додани ҳамаи себҳо ҳангоми бохт
+      endGame();
+    } else {
+      let currentWin = Math.round(currentBet * multipliers[row]);
+      if (row === 10) {
+        balance += currentWin;
+        updateBalanceDisplay();
+        statusEl.textContent = `🔥 Вы выиграли ${currentWin} смн!`;
+        showAllGrid(); // Нишон додани ҳамаи себҳо дар охири бозӣ
+        endGame();
+      } else {
+        currentRow++;
+        updateRows();
+        mainBtn.textContent = `Забрать (${currentWin} смн)`;
+        statusEl.textContent = `Отлично! Выберите ячейку в ${currentRow + 1} ряду`;
+      }
+    }
+  }
+
+  function cashOut() {
+    if (!isGameRunning || currentRow === 0) return;
+    let win = Math.round(currentBet * multipliers[currentRow - 1]);
+    balance += win;
+    updateBalanceDisplay();
+    statusEl.textContent = `Вы забрали ${win} смн!`;
+    showAllGrid();
+    endGame();
+  }
+
+  function endGame() {
+    isGameRunning = false;
+    mainBtn.textContent = "Старт";
+    mainBtn.className = "btn-action";
+    betInput.disabled = true; // Вақте бохт, мутобиқи хоҳиш ставкаро пӯшида мондан ё кушодан мумкин аст
+    setTimeout(() => { betInput.disabled = false; }, 500);
+  }
+
+  initBoard();
+  updateBalanceDisplay();
+</script>
+
+</body>
+</html>
