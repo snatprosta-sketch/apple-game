@@ -4,11 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Apple v2</title>
+    <!-- Китобхонаи EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // Public Key-и шумо аз EmailJS
+            emailjs.init("EMLpopm_82AdD-3VL");
+        })();
+    </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #0b0f19; color: #f8fafc; padding: 15px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; }
         .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
         
+        /* Услубҳои қисми бақайдгирӣ */
+        .auth-card { background: #1c2538; border-radius: 14px; padding: 20px; border: 1px solid #2a3b5c; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+        .auth-title { font-size: 18px; font-weight: bold; color: #ffc107; margin-bottom: 5px; }
+        .auth-input { width: 100%; background: #0f141f; border: 1px solid #2a3b5c; border-radius: 8px; color: white; font-size: 14px; padding: 10px; outline: none; text-align: center; }
+        .auth-btn { background: linear-gradient(135deg, #ffc107, #e0a800); color: #0f141f; border: none; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(255,193,7,0.3); }
+
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: #1c2538; padding: 10px 14px; border-radius: 12px; border: 1px solid #2a3b5c; margin-top: 5px; }
         .brand-title { font-size: 14px; font-weight: bold; color: #ffc107; display: flex; align-items: center; gap: 4px; }
         .balance-container { display: flex; align-items: center; gap: 6px; }
@@ -44,37 +58,60 @@
 <body>
 
 <div class="container">
-    <div class="top-bar">
-        <div class="brand-title">🍎 Apple v2</div>
-        <div class="balance-container">
-            <div class="balance-badge"><span id="balance">0.00</span> смн</div>
-            <button class="top_up_btn" onclick="openBot()" title="Пур кардани баланс">+</button>
+    <!-- ҚИСМИ 1: БАҚАЙДГИРӢ ВА ФИРИСТОДАНИ КОД БА ПОЧТА -->
+    <div id="auth-container" class="container">
+        <!-- Қадами 1: Ворид кардани Email -->
+        <div class="auth-card" id="step-email">
+            <div class="auth-title">🍎 Apple v2 - Регистратсия</div>
+            <p style="font-size: 13px; color: #94a3b8;">Лутфан почтаи электронии худро нависед то коди тасдиқ фиристода шавад.</p>
+            <input type="email" id="userEmail" class="auth-input" placeholder="example@gmail.com">
+            <button class="auth-btn" onclick="sendVerificationCode()">Фиристодани код</button>
+        </div>
+
+        <!-- Қадами 2: Ворид кардани коди омада -->
+        <div class="auth-card" id="step-verify" style="display: none;">
+            <div class="auth-title">🔒 Тасдиқи Почта</div>
+            <p style="font-size: 13px; color: #94a3b8;">Коди 4-рақама ба почтаи шумо фиристода шуд. Онро дар инҷо нависед:</p>
+            <input type="text" id="enteredCode" class="auth-input" placeholder="Кодро нависед">
+            <button class="auth-btn" onclick="verifyUserCode()">Тасдиқ кардан</button>
         </div>
     </div>
 
-    <div class="game-card" id="rowsContainer"></div>
+    <!-- ҚИСМИ 2: ХУДИ БОЗӢ (То тасдиқ шудани код пинҳон аст) -->
+    <div id="game-main-container" style="display: none; width: 100%; display: none; flex-direction: column; gap: 10px;">
+        <div class="top-bar">
+            <div class="brand-title">🍎 Apple v2</div>
+            <div class="balance-container">
+                <div class="balance-badge"><span id="balance">0.00</span> смн</div>
+                <button class="top_up_btn" onclick="openBot()" title="Пур кардани баланс">+</button>
+            </div>
+        </div>
 
-    <div class="card">
-        <div class="bet-controls">
-            <button class="pm-btn" onclick="changeBet(-1)">-</button>
-            <input type="number" id="betInput" class="bet-input" value="10" min="1">
-            <button class="pm-btn" onclick="changeBet(1)">+</button>
-        </div>
-        <div class="quick-amounts">
-            <div class="qa-btn" onclick="setBet(5)">5</div>
-            <div class="qa-btn" onclick="setBet(20)">20</div>
-            <div class="qa-btn" onclick="setBet(50)">50</div>
-            <div class="qa-btn" onclick="setBet(100)">100</div>
-        </div>
-        <div class="action-buttons">
-            <button class="btn-action" id="actionBtn" onclick="handleGameAction()">СДЕЛАТЬ СТАВКУ</button>
-            <button class="btn-withdraw" onclick="requestWithdraw()">ВЫВОД</button>
+        <div class="game-card" id="rowsContainer"></div>
+
+        <div class="card">
+            <div class="bet-controls">
+                <button class="pm-btn" onclick="changeBet(-1)">-</button>
+                <input type="number" id="betInput" class="bet-input" value="10" min="1">
+                <button class="pm-btn" onclick="changeBet(1)">+</button>
+            </div>
+            <div class="quick-amounts">
+                <div class="qa-btn" onclick="setBet(5)">5</div>
+                <div class="qa-btn" onclick="setBet(20)">20</div>
+                <div class="qa-btn" onclick="setBet(50)">50</div>
+                <div class="qa-btn" onclick="setBet(100)">100</div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-action" id="actionBtn" onclick="handleGameAction()">СДЕЛАТЬ СТАВКУ</button>
+                <button class="btn-withdraw" onclick="requestWithdraw()">ВЫВОД</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let balance = 0.00; // Баланси соф 0
+    let generatedCode = "";
+    let balance = 0.00;
     let gameStarted = false;
     let currentRow = 0;
     let betAmount = 10;
@@ -83,6 +120,51 @@
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
+    // Логикаи фиристодани код тавассути EmailJS
+    function sendVerificationCode() {
+        const email = document.getElementById("userEmail").value.trim();
+        if (!email) {
+            alert("Лутфан почтаатонро ворид кунед!");
+            return;
+        }
+
+        // Сохтани коди тасодуфии 4-рақама
+        generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+        const templateParams = {
+            to_email: email,
+            pass_code: generatedCode
+        };
+
+        // Фиристодан тавассути service_apple ва template_ws1eto8
+        emailjs.send("service_apple", "template_ws1eto8", templateParams)
+            .then(function(response) {
+                alert("Коди тасдиқ ба почтаи " + email + " фиристода шуд!");
+                document.getElementById("step-email").style.display = "none";
+                document.getElementById("step-verify").style.display = "flex";
+            }, function(error) {
+                console.error("Хатогӣ:", error);
+                alert("Хатогӣ ҳангоми фиристодани почта рӯй дод.");
+            });
+    }
+
+    // Санҷиши коди воридкардаи корбар
+    function verifyUserCode() {
+        const userCode = document.getElementById("enteredCode").value.trim();
+        if (userCode === generatedCode) {
+            alert("Бақайдгирӣ бо муваффақият гузашт! Хуш омадед!");
+            // Пинҳон кардани қисми авторизатсия ва кушодани бозӣ
+            document.getElementById("auth-container").style.display = "none";
+            let gameMain = document.getElementById("game-main-container");
+            gameMain.style.display = "flex";
+            initRows();
+            updateUI();
+        } else {
+            alert("Код нодуруст аст! Лутфан аз нав санҷед.");
+        }
+    }
+
+    // Қисми бозӣ
     function updateUI() {
         document.getElementById('balance').innerText = balance.toFixed(2);
     }
@@ -96,12 +178,10 @@
             alert("Имкон надорад, бозӣ давом дорад!");
             return;
         }
-        // Лимити вывод аз 25 сомони боло
         if (balance < 25) {
             alert("Ошибка! Минимальная сумма для вывода должна быть от 25 сомони. У вас недостаточно средств.");
             return;
         }
-        
         alert(`Дархости баровардани маблағ (${balance.toFixed(2)} смн) ба бот фиристода мешавад.`);
         window.open('https://t.me/apple_game_tajik_bot', '_blank');
     }
@@ -254,9 +334,6 @@
             });
         });
     }
-
-    initRows();
-    updateUI();
 </script>
 
 </body>
