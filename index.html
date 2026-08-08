@@ -8,7 +8,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // Public Key-и шумо аз EmailJS
             emailjs.init("EMLpopm_82AdD-3VL");
         })();
     </script>
@@ -53,6 +52,7 @@
         .action-buttons { display: flex; gap: 8px; }
         .btn-action { background: linear-gradient(135deg, #ffc107, #e0a800); color: #0f141f; border: none; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; flex: 2; text-align: center; box-shadow: 0 4px 12px rgba(255,193,7,0.3); }
         .btn-withdraw { background: #ef4444; color: #fff; border: none; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; flex: 1; text-align: center; }
+        .user-id-info { font-size: 11px; color: #64748b; text-align: center; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -78,12 +78,12 @@
     </div>
 
     <!-- ҚИСМИ 2: ХУДИ БОЗӢ (То тасдиқ шудани код пинҳон аст) -->
-    <div id="game-main-container" style="display: none; width: 100%; display: none; flex-direction: column; gap: 10px;">
+    <div id="game-main-container" style="display: none; width: 100%; flex-direction: column; gap: 10px;">
         <div class="top-bar">
             <div class="brand-title">🍎 Apple v2</div>
             <div class="balance-container">
                 <div class="balance-badge"><span id="balance">0.00</span> смн</div>
-                <button class="top_up_btn" onclick="openBot()" title="Пур кардани баланс">+</button>
+                <button class="top_up_btn" onclick="openBot('topup')" title="Пур кардани баланс">+</button>
             </div>
         </div>
 
@@ -105,6 +105,7 @@
                 <button class="btn-action" id="actionBtn" onclick="handleGameAction()">СДЕЛАТЬ СТАВКУ</button>
                 <button class="btn-withdraw" onclick="requestWithdraw()">ВЫВОД</button>
             </div>
+            <div class="user-id-info" id="userIdDisplay">ID рақамӣ: -</div>
         </div>
     </div>
 </div>
@@ -115,12 +116,28 @@
     let gameStarted = false;
     let currentRow = 0;
     let betAmount = 10;
+    let userNumericId = "";
+    let currentEmail = "";
     
     const multipliers = [1.22, 1.54, 2.31, 3.74, 4.00, 5.54, 6.43, 11.00, 22.00, 63.00, 100.00];
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
-    // Логикаи фиристодани код тавассути EmailJS
+    // Санҷиш дар хотимаи саҳифа ки оё аллакай сабт шудааст ё не
+    window.addEventListener('DOMContentLoaded', () => {
+        let savedEmail = localStorage.getItem('apple_registered_email');
+        let savedId = localStorage.getItem('apple_numeric_id');
+        if (savedEmail && savedId) {
+            currentEmail = savedEmail;
+            userNumericId = savedId;
+            document.getElementById("auth-container").style.display = "none";
+            document.getElementById("game-main-container").style.display = "flex";
+            document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
+            initRows();
+            updateUI();
+        }
+    });
+
     function sendVerificationCode() {
         const email = document.getElementById("userEmail").value.trim();
         if (!email) {
@@ -128,7 +145,7 @@
             return;
         }
 
-        // Сохтани коди тасодуфии 4-рақама
+        currentEmail = email;
         generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
 
         const templateParams = {
@@ -136,7 +153,6 @@
             pass_code: generatedCode
         };
 
-        // Фиристодан тавассути service_apple ва template_ws1eto8
         emailjs.send("service_apple", "template_ws1eto8", templateParams)
             .then(function(response) {
                 alert("Коди тасдиқ ба почтаи " + email + " фиристода шуд!");
@@ -148,15 +164,21 @@
             });
     }
 
-    // Санҷиши коди воридкардаи корбар
     function verifyUserCode() {
         const userCode = document.getElementById("enteredCode").value.trim();
         if (userCode === generatedCode) {
             alert("Бақайдгирӣ бо муваффақият гузашт! Хуш омадед!");
-            // Пинҳон кардани қисми авторизатсия ва кушодани бозӣ
+            
+            // Тавлиди ID-и рақамии уникалӣ барои ин корбар агар надошта бошад
+            userNumericId = Math.floor(10000000 + Math.random() * 90000000).toString();
+            
+            localStorage.setItem('apple_registered_email', currentEmail);
+            localStorage.setItem('apple_numeric_id', userNumericId);
+
             document.getElementById("auth-container").style.display = "none";
-            let gameMain = document.getElementById("game-main-container");
-            gameMain.style.display = "flex";
+            document.getElementById("game-main-container").style.display = "flex";
+            document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
+            
             initRows();
             updateUI();
         } else {
@@ -164,13 +186,13 @@
         }
     }
 
-    // Қисми бозӣ
     function updateUI() {
         document.getElementById('balance').innerText = balance.toFixed(2);
     }
 
-    function openBot() {
-        window.open('https://t.me/apple_game_tajik_bot', '_blank');
+    function openBot(actionType) {
+        const url = `https://t.me/apple_game_tajik_bot?start=${actionType}_${userNumericId}`;
+        window.open(url, '_blank');
     }
 
     function requestWithdraw() {
@@ -183,7 +205,7 @@
             return;
         }
         alert(`Дархости баровардани маблағ (${balance.toFixed(2)} смн) ба бот фиристода мешавад.`);
-        window.open('https://t.me/apple_game_tajik_bot', '_blank');
+        openBot('withdraw');
     }
 
     function initRows() {
@@ -245,7 +267,7 @@
             betAmount = parseFloat(document.getElementById('betInput').value);
             if (betAmount > balance) { 
                 alert("Недостаточно средств! Пополните через бота @apple_game_tajik_bot"); 
-                window.open('https://t.me/apple_game_tajik_bot', '_blank');
+                openBot('topup');
                 return; 
             }
             
