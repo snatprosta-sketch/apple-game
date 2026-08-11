@@ -109,7 +109,8 @@
 </div>
 
 <script>
-    const RENDER_URL = "https://номи-сервери-шумо.onrender.com";
+    // Линки сервери Render-и шумо
+    const SERVER_URL = "https://apple-game-w2wk.onrender.com";
 
     let generatedCode = "";
     let balance = 0.00;
@@ -129,6 +130,9 @@
         if (savedEmail && savedId) {
             currentEmail = savedEmail;
             userNumericId = savedId;
+            // Дар хотир доред, ки ID-ро ба localStorage барои ҳамкорӣ бо бот низ мефиристем
+            localStorage.setItem('apple_numeric_id', userNumericId);
+            
             document.getElementById("auth-container").style.display = "none";
             document.getElementById("game-main-container").style.display = "flex";
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
@@ -353,18 +357,15 @@
         });
     }
 
-    // --- Синхронизатсияи баланс бо сервери Render (Ислоҳшуда) ---
+    // --- Синхронизатсияи баланс бо сервери Render ---
     async function syncBalanceFromServer() {
         if (!userNumericId) return;
         try {
-            const res = await fetch(`https://apple-game-w2wk.onrender.com/balance?game_id=${userNumericId}`);
+            const res = await fetch(`${SERVER_URL}/balance?game_id=${userNumericId}`);
             const data = await res.json();
             
             if (data && typeof data.balance !== 'undefined') {
-                // Баланси дохилии бозиро нав мекунем, то ставку кардан шавад
                 balance = Number(data.balance);
-                
-                // Барои дар экран намоён шудани маблағ
                 const balanceEl = document.getElementById('balance');
                 if (balanceEl) {
                     balanceEl.innerText = balance.toFixed(2);
