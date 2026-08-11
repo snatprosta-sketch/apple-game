@@ -52,10 +52,11 @@ init_db()
 
 class SimpleHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        import urllib.parse as up
+        parsed_url = up.urlparse(self.path)
+        query_params = up.parse_qs(parsed_url.query)
+        
         if self.path.startswith("/balance"):
-            import urllib.parse as up
-            parsed_url = up.urlparse(self.path)
-            query_params = up.parse_qs(parsed_url.query)
             game_id = query_params.get("game_id", [None])[0]
             balance = get_balance(game_id)
             response = json.dumps({"balance": balance}).encode("utf-8")
@@ -65,6 +66,24 @@ class SimpleHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(response)
             return
+            
+        elif self.path.startswith("/update"):
+            game_id = query_params.get("game_id", [None])[0]
+            try:
+                amount = float(query_params.get("amount", [0])[0])
+            except:
+                amount = 0.0
+            
+            update_balance(game_id, amount)
+            balance = get_balance(game_id)
+            response = json.dumps({"success": True, "balance": balance}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(response)
+            return
+
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Bot is running!")
@@ -238,3 +257,4 @@ def admin_enter_amount(message):
     bot.reply_to(message, "✅ Баланс бо муваффақият нав карда шуд!")
 
 bot.polling(none_stop=True)
+            
