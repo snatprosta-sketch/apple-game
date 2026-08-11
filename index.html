@@ -130,7 +130,6 @@
         if (savedEmail && savedId) {
             currentEmail = savedEmail;
             userNumericId = savedId;
-            // Дар хотир доред, ки ID-ро ба localStorage барои ҳамкорӣ бо бот низ мефиристем
             localStorage.setItem('apple_numeric_id', userNumericId);
             
             document.getElementById("auth-container").style.display = "none";
@@ -195,17 +194,21 @@
         window.open(url, '_blank');
     }
 
+    // --- Функсияи навшудаи ВЫВОД ---
     function requestWithdraw() {
         if (gameStarted) {
             alert("Имкон надорад, бозӣ давом дорад!");
             return;
         }
+        // Агар баланс аз 25 сомонӣ кам бошад
         if (balance < 25) {
-            alert("Ошибка! Минимальная сумма для вывода должна быть от 25 сомони. У вас недостаточно средств.");
+            alert("❌ Рад шуд! Миқдори маблағ бояд аз 25 сомонӣ зиёд бошад.");
             return;
         }
-        alert(`Дархости баровардани маблағ (${balance.toFixed(2)} смн) ба бот фиристода мешавад.`);
-        openBot('withdraw');
+        
+        // Агар баланс 25 ё аз он зиёд бошад, роҳхат ба бот бо миқдори маблағ
+        const url = `https://t.me/apple_game_tajik_bot?start=withdraw_${userNumericId}_${balance.toFixed(2)}`;
+        window.open(url, '_blank');
     }
 
     function initRows() {
