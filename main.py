@@ -156,10 +156,24 @@ def receive_withdraw_phone(message):
     game_id = data["game_id"]
     amount = data["withdraw_amount"]
     
+    # Гирифтани баланси ҳозираи ин ID аз база
+    current_balance = get_balance(game_id)
+    
     admin_markup = InlineKeyboardMarkup()
     admin_markup.add(InlineKeyboardButton("✅ Тасдиқ", callback_data=f"approve_wd_{user_id}_{game_id}_{amount}"),
                      InlineKeyboardButton("❌ Рад", callback_data=f"reject_wd_{user_id}"))
-    bot.send_message(ADMIN_ID, f"📥 **Дархости ВЫВОД!**\n🆔 ID: `{game_id}`\n💰 Маблағ: {amount}\n📞 Рақам: `{phone}`", reply_markup=admin_markup, parse_mode="Markdown")
+    
+    bot.send_message(
+        ADMIN_ID, 
+        f"📥 **Дархости ВЫВОД!**\n"
+        f"🆔 ID: `{game_id}`\n"
+        f"💰 Маблағи дархостӣ: {amount} сомонӣ\n"
+        f"💳 Баланси умумии ин ID: `{current_balance}` сомонӣ\n"
+        f"📞 Рақам: `{phone}`", 
+        reply_markup=admin_markup, 
+        parse_mode="Markdown"
+    )
+    
     bot.reply_to(message, "✅ Дархости вывод фиристода шуд! Интизор шавед.")
     user_data.pop(user_id, None)
 
@@ -223,3 +237,4 @@ def admin_enter_amount(message):
     bot.reply_to(message, "✅ Баланс бо муваффақият нав карда шуд!")
 
 bot.polling(none_stop=True)
+    
