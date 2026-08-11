@@ -366,6 +366,36 @@
             });
         });
     }
+    // --- Синхронизатсияи баланс бо сервери Render ---
+async function syncBalanceFromServer() {
+    try {
+        const gameId = "24867296"; // ID бозии шумо
+        const res = await fetch(`https://apple-game-w2wk.onrender.com/balance?game_id=${gameId}`);
+        const data = await res.json();
+        
+        if (data && typeof data.balance !== 'undefined') {
+            // Баланси дохилии бозиро нав мекунем
+            if (typeof balance !== 'undefined') {
+                balance = data.balance;
+            }
+            
+            // Барои дар экран намоён шудани маблағ
+            const spans = document.querySelectorAll('span, div, b');
+            spans.forEach(el => {
+                if (el.textContent.includes('смн') && !el.textContent.includes('СДЕЛАТЬ')) {
+                    el.textContent = data.balance.toFixed(2) + " смн";
+                }
+            });
+        }
+    } catch (e) {
+        console.error("Хатогӣ дар гирифтани баланс:", e);
+    }
+}
+
+// Ҳар 3 сония баланс аз сервер нав мешавад
+setInterval(syncBalanceFromServer, 3000);
+// Ҳангоми кушода шудани бозӣ фавран мехонад
+syncBalanceFromServer();
 </script>
 
 </body>
