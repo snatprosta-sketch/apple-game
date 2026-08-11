@@ -231,8 +231,10 @@ def admin_enter_amount(message):
     update_balance(game_id, amount)
     
     bot.send_message(state["target_user_id"], f"🎉 Чек тасдиқ шуд! {amount} сомонӣ илова гардид.")
-    bot.edit_message_caption(chat_id=ADMIN_ID, message_id=state["message_id"], caption=message.caption + f"\n\n✅ ТАСДИҚ ШУД: {amount} сомонӣ" if message.caption else f"✅ ТАСДИҚ ШУД: {amount} сомонӣ")
+    try:
+        bot.edit_message_caption(chat_id=ADMIN_ID, message_id=state["message_id"], caption=f"✅ ТАСДИҚ ШУД: {amount} сомонӣ")
+    except:
+        pass
     bot.reply_to(message, "✅ Баланс бо муваффақият нав карда шуд!")
 
 bot.polling(none_stop=True)
-    
