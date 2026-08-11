@@ -1,25 +1,47 @@
 import json
 import os
+import sqlite3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
-# Файли нигоҳдории балансҳо дар сервер
-BALANCES_FILE = "balances.json"
+# Танзими базаи маълумот бо SQLite
+DB_FILE = "balances.db"
 
-def load_balances():
-    if os.path.exists(BALANCES_FILE):
-        try:
-            with open(BALANCES_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS balances (
+            game_id TEXT PRIMARY KEY,
+            balance REAL
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-def save_balances(balances):
-    with open(BALANCES_FILE, "w", encoding="utf-8") as f:
-        json.dump(balances, f, ensure_ascii=False, indent=4)
+def get_balance(game_id):
+    if not game_id:
+        return 0.0
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT balance FROM balances WHERE game_id = ?', (str(game_id),))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else 0.0
+
+def update_balance(game_id, amount):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO balances (game_id, balance) VALUES (?, ?)
+        ON CONFLICT(game_id) DO UPDATE SET balance = balance + ?
+    ''', (str(game_id), amount, amount))
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # Веб-сервер барои Render (барои бозӣ)
 class SimpleHandler(BaseHTTPRequestHandler):
@@ -29,8 +51,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
             parsed_url = up.urlparse(self.path)
             query_params = up.parse_qs(parsed_url.query)
             game_id = query_params.get("game_id", [None])[0]
-            balances = load_balances()
-            balance = balances.get(str(game_id), 0)
+            balance = get_balance(game_id)
             response = json.dumps({"balance": balance}).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -64,7 +85,7 @@ admin_state = {}
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    text = message.text # Мисол: /start withdraw_12345678_50.00 ё /start topup_12345678
+    text = message.text 
     
     if "withdraw" in text:
         parts = text.split('_')
@@ -121,7 +142,6 @@ def receive_withdraw_phone(message):
     game_id = data["game_id"]
     amount = data["withdraw_amount"]
     
-    # Фиристодани дархости вывод ба админ
     admin_markup = InlineKeyboardMarkup()
     admin_markup.add(InlineKeyboardButton("✅ Тасдиқ кардан", callback_data=f"approve_wd_{user_id}_{game_id}_{amount}"),
                      InlineKeyboardButton("❌ Рад кардан", callback_data=f"reject_wd_{user_id}"))
@@ -160,7 +180,6 @@ def admin_decision(call):
     if call.from_user.id != ADMIN_ID: return
     parts = call.data.split("_")
     
-    # Қисми тасдиқи вывод (approve_wd)
     if parts[1] == "wd":
         action = parts[0]
         user_id = int(parts[2])
@@ -168,12 +187,9 @@ def admin_decision(call):
             game_id = parts[3]
             amount = float(parts[4])
             
-            # Аз баланси сервер кам кардани маблағи вывод
-            balances = load_balances()
-            current_bal = balances.get(str(game_id), 0)
+            current_bal = get_balance(game_id)
             if current_bal >= amount:
-                balances[str(game_id)] = current_bal - amount
-                save_balances(balances)
+                update_balance(game_id, -amount)
             
             bot.send_message(user_id, f"✅ Дархости вывови шумо ({amount} сомонӣ) тасдиқ шуд! Маблағ ба рақами шумо фиристода шуд.")
             bot.edit_message_text(call.message.chat.id, call.message.message_id, call.message.caption + "\n\n✅ ВЫВОД ТАСДИҚ ШУД")
@@ -182,7 +198,6 @@ def admin_decision(call):
             bot.edit_message_text(call.message.chat.id, call.message.message_id, call.message.caption + "\n\n❌ ВЫВОД РАД ШУД")
         return
 
-    # Қисми оддии пополнение (approve / reject)
     action, user_id = parts[0], int(parts[1])
     if action == "approve":
         game_id = parts[2]
@@ -202,9 +217,8 @@ def admin_enter_amount(message):
     
     state = admin_state.pop(ADMIN_ID)
     game_id = state["game_id"]
-    balances = load_balances()
-    balances[game_id] = balances.get(str(game_id), 0) + amount
-    save_balances(balances)
+    
+    update_balance(game_id, amount)
     
     bot.send_message(state["target_user_id"], f"🎉 Чек тасдиқ шуд! {amount} сомонӣ илова гардид.")
     bot.edit_message_caption(chat_id=ADMIN_ID, message_id=state["message_id"], caption=f"✅ ТАСДИҚ ШУД: {amount} сомонӣ")
