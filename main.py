@@ -64,6 +64,29 @@ admin_state = {}
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    text = message.text # Мисол: /start withdraw_12345678_50.00 ё /start topup_12345678
+    
+    if "withdraw" in text:
+        parts = text.split('_')
+        game_id = parts[1] if len(parts) > 1 else ""
+        amount = parts[2] if len(parts) > 2 else "0"
+        
+        user_data[message.from_user.id] = {
+            "game_id": game_id,
+            "withdraw_amount": amount,
+            "step": "waiting_phone"
+        }
+        
+        bot.send_message(
+            message.chat.id,
+            f"📤 **Дархости вывод**\n"
+            f"🆔 ID бозӣ: `{game_id}`\n"
+            f"💰 Маблағ: {amount} сомонӣ\n\n"
+            f"Лутфан рақами телефони худро (масалан: +992901698338) нависед:",
+            parse_mode="Markdown"
+        )
+        return
+
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("🎮 Бозӣ кардан", web_app=WebAppInfo(url=GAME_URL)))
     markup.add(InlineKeyboardButton("💳 Пополнить баланс", callback_data="deposit"))
@@ -90,6 +113,33 @@ def receive_game_id(message):
     user_data[message.from_user.id]["step"] = "waiting_photo"
     bot.reply_to(message, "✅ ID қабул шуд. Акнун скриншоти чекро фиристед!")
 
+@bot.message_handler(func=lambda m: m.from_user.id in user_data and user_data[m.from_user.id].get("step") == "waiting_phone")
+def receive_withdraw_phone(message):
+    user_id = message.from_user.id
+    phone = message.text.strip()
+    data = user_data[user_id]
+    game_id = data["game_id"]
+    amount = data["withdraw_amount"]
+    
+    # Фиристодани дархости вывод ба админ
+    admin_markup = InlineKeyboardMarkup()
+    admin_markup.add(InlineKeyboardButton("✅ Тасдиқ кардан", callback_data=f"approve_wd_{user_id}_{game_id}_{amount}"),
+                     InlineKeyboardButton("❌ Рад кардан", callback_data=f"reject_wd_{user_id}"))
+    
+    bot.send_message(
+        ADMIN_ID,
+        f"📥 **Дархости нави ВЫВОД!**\n"
+        f"👤 Корбар: {message.from_user.first_name}\n"
+        f"🆔 ID Бозӣ: `{game_id}`\n"
+        f"💰 Маблағ: {amount} сомонӣ\n"
+        f"📞 Рақам: `{phone}`",
+        reply_markup=admin_markup,
+        parse_mode="Markdown"
+    )
+    
+    bot.reply_to(message, "✅ Дархости шумо фиристода шуд! Баъди 15 дақиқа маблағ мегузарад.")
+    user_data.pop(user_id, None)
+
 @bot.message_handler(content_types=["photo"])
 def receive_photo(message):
     user_id = message.from_user.id
@@ -109,6 +159,30 @@ def receive_photo(message):
 def admin_decision(call):
     if call.from_user.id != ADMIN_ID: return
     parts = call.data.split("_")
+    
+    # Қисми тасдиқи вывод (approve_wd)
+    if parts[1] == "wd":
+        action = parts[0]
+        user_id = int(parts[2])
+        if action == "approve":
+            game_id = parts[3]
+            amount = float(parts[4])
+            
+            # Аз баланси сервер кам кардани маблағи вывод
+            balances = load_balances()
+            current_bal = balances.get(str(game_id), 0)
+            if current_bal >= amount:
+                balances[str(game_id)] = current_bal - amount
+                save_balances(balances)
+            
+            bot.send_message(user_id, f"✅ Дархости вывови шумо ({amount} сомонӣ) тасдиқ шуд! Маблағ ба рақами шумо фиристода шуд.")
+            bot.edit_message_text(call.message.chat.id, call.message.message_id, call.message.caption + "\n\n✅ ВЫВОД ТАСДИҚ ШУД")
+        else:
+            bot.send_message(user_id, "❌ Дархости вывови шумо рад карда шуд.")
+            bot.edit_message_text(call.message.chat.id, call.message.message_id, call.message.caption + "\n\n❌ ВЫВОД РАД ШУД")
+        return
+
+    # Қисми оддии пополнение (approve / reject)
     action, user_id = parts[0], int(parts[1])
     if action == "approve":
         game_id = parts[2]
@@ -137,3 +211,4 @@ def admin_enter_amount(message):
     bot.reply_to(message, "✅ Муваффақият! Баланс нав карда шуд.")
 
 bot.polling(none_stop=True)
+    
