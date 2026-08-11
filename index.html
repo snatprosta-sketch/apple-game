@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    <!-- ҚИСМИ 2: ХУДИ БОЗӢ (То тасдиқ шудани код пинҳон аст) -->
+    <!-- ҚИСМИ 2: ХУДИ БОЗӢ -->
     <div id="game-main-container" style="display: none; width: 100%; flex-direction: column; gap: 10px;">
         <div class="top-bar">
             <div class="brand-title">🍎 Apple v2</div>
@@ -111,6 +111,9 @@
 </div>
 
 <script>
+    // ИН ҶО СУРОҒАИ СЕРВЕРИ RENDER-И ХУДРО НАВИСЕД (Бе слэш / дар охир)
+    const RENDER_URL = "https://apple-game.onrender.com"; 
+
     let generatedCode = "";
     let balance = 0.00;
     let gameStarted = false;
@@ -123,7 +126,7 @@
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
-    // Санҷиш дар хотимаи саҳифа ки оё аллакай сабт шудааст ё не
+    // Санҷиш ҳангоми кушодани саҳифа
     window.addEventListener('DOMContentLoaded', () => {
         let savedEmail = localStorage.getItem('apple_registered_email');
         let savedId = localStorage.getItem('apple_numeric_id');
@@ -134,9 +137,26 @@
             document.getElementById("game-main-container").style.display = "flex";
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             initRows();
-            updateUI();
+            fetchBalanceFromServer();
+            // Ҳар 3 сония балансро аз сервер нав мекунад
+            setInterval(fetchBalanceFromServer, 3000);
         }
     });
+
+    // Функцияи гирифтани баланс аз сервери Render
+    async function fetchBalanceFromServer() {
+        if (!userNumericId) return;
+        try {
+            let response = await fetch(`${RENDER_URL}/balance?game_id=${userNumericId}`);
+            let data = await response.json();
+            if (data && typeof data.balance !== 'undefined') {
+                balance = data.balance;
+                document.getElementById('balance').innerText = balance.toFixed(2);
+            }
+        } catch (e) {
+            console.error("Хатогӣ дар гирифтани баланс:", e);
+        }
+    }
 
     function sendVerificationCode() {
         const email = document.getElementById("userEmail").value.trim();
@@ -169,7 +189,6 @@
         if (userCode === generatedCode) {
             alert("Бақайдгирӣ бо муваффақият гузашт! Хуш омадед!");
             
-            // Тавлиди ID-и рақамии уникалӣ барои ин корбар агар надошта бошад
             userNumericId = Math.floor(10000000 + Math.random() * 90000000).toString();
             
             localStorage.setItem('apple_registered_email', currentEmail);
@@ -180,14 +199,11 @@
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             
             initRows();
-            updateUI();
+            fetchBalanceFromServer();
+            setInterval(fetchBalanceFromServer, 3000);
         } else {
             alert("Код нодуруст аст! Лутфан аз нав санҷед.");
         }
-    }
-
-    function updateUI() {
-        document.getElementById('balance').innerText = balance.toFixed(2);
     }
 
     function openBot(actionType) {
@@ -266,13 +282,13 @@
         if (!gameStarted) {
             betAmount = parseFloat(document.getElementById('betInput').value);
             if (betAmount > balance) { 
-                alert("Недостаточно средств! Пополните через бота @apple_game_tajik_bot"); 
+                alert("Недостаточно средств! Пополните через бота"); 
                 openBot('topup');
                 return; 
             }
             
             balance -= betAmount;
-            updateUI();
+            document.getElementById('balance').innerText = balance.toFixed(2);
             
             gameStarted = true;
             currentRow = 0;
@@ -299,7 +315,7 @@
         } else {
             let win = betAmount * (currentRow > 0 ? multipliers[currentRow - 1] : multipliers[0]);
             balance += win;
-            updateUI();
+            document.getElementById('balance').innerText = balance.toFixed(2);
             revealAllApples();
             alert(`Вы успешно забрали выигрыш: +${win.toFixed(2)} смн`);
             gameStarted = false;
@@ -332,7 +348,7 @@
             } else {
                 let win = betAmount * multipliers[10];
                 balance += win;
-                updateUI();
+                document.getElementById('balance').innerText = balance.toFixed(2);
                 revealAllApples();
                 alert(`Поздравляем! Вы достигли вершины (x100)! Выигрыш: +${win.toFixed(2)} смн`);
                 gameStarted = false;
