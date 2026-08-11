@@ -58,9 +58,8 @@
 <body>
 
 <div class="container">
-    <!-- ҚИСМИ 1: БАҚАЙДГИРӢ ВА ФИРИСТОДАНИ КОД БА ПОЧТА -->
+    <!-- ҚИСМИ 1: БАҚАЙДГИРӢ -->
     <div id="auth-container" class="container">
-        <!-- Қадами 1: Ворид кардани Email -->
         <div class="auth-card" id="step-email">
             <div class="auth-title">🍎 Apple v2 - Регистратсия</div>
             <p style="font-size: 13px; color: #94a3b8;">Лутфан почтаи электронии худро нависед то коди тасдиқ фиристода шавад.</p>
@@ -68,7 +67,6 @@
             <button class="auth-btn" onclick="sendVerificationCode()">Фиристодани код</button>
         </div>
 
-        <!-- Қадами 2: Ворид кардани коди омада -->
         <div class="auth-card" id="step-verify" style="display: none;">
             <div class="auth-title">🔒 Тасдиқи Почта</div>
             <p style="font-size: 13px; color: #94a3b8;">Коди 4-рақама ба почтаи шумо фиристода шуд. Онро дар инҷо нависед:</p>
@@ -111,7 +109,7 @@
 </div>
 
 <script>
-    // ИН ҶО СУРОҒАИ СЕРВЕРИ RENDER-И ХУДРО НАВИСЕД (Бе слэш / дар охир)
+    // СУРОҒАИ СЕРВЕРИ RENDER-И ХУДРО ДАР ИНҶО ТАФТИШ КУНЕД
     const RENDER_URL = "https://apple-game.onrender.com"; 
 
     let generatedCode = "";
@@ -126,7 +124,6 @@
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
-    // Санҷиш ҳангоми кушодани саҳифа
     window.addEventListener('DOMContentLoaded', () => {
         let savedEmail = localStorage.getItem('apple_registered_email');
         let savedId = localStorage.getItem('apple_numeric_id');
@@ -138,12 +135,10 @@
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             initRows();
             fetchBalanceFromServer();
-            // Ҳар 3 сония балансро аз сервер нав мекунад
             setInterval(fetchBalanceFromServer, 3000);
         }
     });
 
-    // Функцияи гирифтани баланс аз сервери Render
     async function fetchBalanceFromServer() {
         if (!userNumericId) return;
         try {
