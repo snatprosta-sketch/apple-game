@@ -133,24 +133,10 @@
             document.getElementById("game-main-container").style.display = "flex";
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             initRows();
-            fetchBalanceFromServer();
-            setInterval(fetchBalanceFromServer, 3000);
+            syncBalanceFromServer();
+            setInterval(syncBalanceFromServer, 3000);
         }
     });
-
-    async function fetchBalanceFromServer() {
-        if (!userNumericId) return;
-        try {
-            let response = await fetch(`${RENDER_URL}/balance?game_id=${userNumericId}`);
-            let data = await response.json();
-            if (data && typeof data.balance !== 'undefined') {
-                balance = data.balance;
-                document.getElementById('balance').innerText = balance.toFixed(2);
-            }
-        } catch (e) {
-            console.error("Хатогӣ дар гирифтани баланс:", e);
-        }
-    }
 
     function sendVerificationCode() {
         const email = document.getElementById("userEmail").value.trim();
@@ -193,8 +179,8 @@
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             
             initRows();
-            fetchBalanceFromServer();
-            setInterval(fetchBalanceFromServer, 3000);
+            syncBalanceFromServer();
+            setInterval(syncBalanceFromServer, 3000);
         } else {
             alert("Код нодуруст аст! Лутфан аз нав санҷед.");
         }
@@ -366,36 +352,28 @@
             });
         });
     }
-    // --- Синхронизатсияи баланс бо сервери Render ---
-async function syncBalanceFromServer() {
-    try {
-        const gameId = "24867296"; // ID бозии шумо
-        const res = await fetch(`https://apple-game-w2wk.onrender.com/balance?game_id=${gameId}`);
-        const data = await res.json();
-        
-        if (data && typeof data.balance !== 'undefined') {
-            // Баланси дохилии бозиро нав мекунем
-            if (typeof balance !== 'undefined') {
-                balance = data.balance;
-            }
-            
-            // Барои дар экран намоён шудани маблағ
-            const spans = document.querySelectorAll('span, div, b');
-            spans.forEach(el => {
-                if (el.textContent.includes('смн') && !el.textContent.includes('СДЕЛАТЬ')) {
-                    el.textContent = data.balance.toFixed(2) + " смн";
-                }
-            });
-        }
-    } catch (e) {
-        console.error("Хатогӣ дар гирифтани баланс:", e);
-    }
-}
 
-// Ҳар 3 сония баланс аз сервер нав мешавад
-setInterval(syncBalanceFromServer, 3000);
-// Ҳангоми кушода шудани бозӣ фавран мехонад
-syncBalanceFromServer();
+    // --- Синхронизатсияи баланс бо сервери Render (Ислоҳшуда) ---
+    async function syncBalanceFromServer() {
+        if (!userNumericId) return;
+        try {
+            const res = await fetch(`https://apple-game-w2wk.onrender.com/balance?game_id=${userNumericId}`);
+            const data = await res.json();
+            
+            if (data && typeof data.balance !== 'undefined') {
+                // Баланси дохилии бозиро нав мекунем, то ставку кардан шавад
+                balance = Number(data.balance);
+                
+                // Барои дар экран намоён шудани маблағ
+                const balanceEl = document.getElementById('balance');
+                if (balanceEl) {
+                    balanceEl.innerText = balance.toFixed(2);
+                }
+            }
+        } catch (e) {
+            console.error("Хатогӣ дар гирифтани баланс:", e);
+        }
+    }
 </script>
 
 </body>
