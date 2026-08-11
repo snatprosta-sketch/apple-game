@@ -109,7 +109,6 @@
 </div>
 
 <script>
-    // Линки сервери Render-и шумо
     const SERVER_URL = "https://apple-game-w2wk.onrender.com";
 
     let generatedCode = "";
@@ -137,7 +136,7 @@
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             initRows();
             syncBalanceFromServer();
-            setInterval(syncBalanceFromServer, 3000);
+            setInterval(syncBalanceFromServer, 2000);
         }
     });
 
@@ -183,7 +182,7 @@
             
             initRows();
             syncBalanceFromServer();
-            setInterval(syncBalanceFromServer, 3000);
+            setInterval(syncBalanceFromServer, 2000);
         } else {
             alert("Код нодуруст аст! Лутфан аз нав санҷед.");
         }
@@ -194,19 +193,16 @@
         window.open(url, '_blank');
     }
 
-    // --- Функсияи навшудаи ВЫВОД ---
     function requestWithdraw() {
         if (gameStarted) {
             alert("Имкон надорад, бозӣ давом дорад!");
             return;
         }
-        // Агар баланс аз 25 сомонӣ кам бошад
         if (balance < 25) {
             alert("❌ Рад шуд! Миқдори маблағ бояд аз 25 сомонӣ зиёд бошад.");
             return;
         }
         
-        // Агар баланс 25 ё аз он зиёд бошад, роҳхат ба бот бо миқдори маблағ
         const url = `https://t.me/apple_game_tajik_bot?start=withdraw_${userNumericId}_${balance.toFixed(2)}`;
         window.open(url, '_blank');
     }
@@ -265,17 +261,36 @@
         inp.value = Math.max(1, v + delta);
     }
 
-    function handleGameAction() {
+    // --- Функсия барои фиристодани тағйироти баланс ба сервер ---
+    async function updateServerBalance(amountChange) {
+        if (!userNumericId) return;
+        try {
+            const res = await fetch(`${SERVER_URL}/update?game_id=${userNumericId}&amount=${amountChange}`);
+            const data = await res.json();
+            if (data && typeof data.balance !== 'undefined') {
+                balance = Number(data.balance);
+                document.getElementById('balance').innerText = balance.toFixed(2);
+            }
+        } catch (e) {
+            console.error("Хатогӣ дар навсозии баланс:", e);
+        }
+    }
+
+    async function handleGameAction() {
         if (!gameStarted) {
             betAmount = parseFloat(document.getElementById('betInput').value);
+            
+            // Пеш аз оғоз санҷидани баланси воқеии сервер
+            await syncBalanceFromServer();
+            
             if (betAmount > balance) { 
                 alert("Недостаточно средств! Пополните через бота"); 
                 openBot('topup');
                 return; 
             }
             
-            balance -= betAmount;
-            document.getElementById('balance').innerText = balance.toFixed(2);
+            // Балансро дар сервер кам мекунем (бо аломати минус)
+            await updateServerBalance(-betAmount);
             
             gameStarted = true;
             currentRow = 0;
@@ -301,8 +316,10 @@
             document.getElementById('actionBtn').style.color = "#fff";
         } else {
             let win = betAmount * (currentRow > 0 ? multipliers[currentRow - 1] : multipliers[0]);
-            balance += win;
-            document.getElementById('balance').innerText = balance.toFixed(2);
+            
+            // Бурдро ба сервер илова мекунем (бо аломати мусбат)
+            await updateServerBalance(win);
+            
             revealAllApples();
             alert(`Вы успешно забрали выигрыш: +${win.toFixed(2)} смн`);
             gameStarted = false;
@@ -334,8 +351,10 @@
                 setRowActive(currentRow);
             } else {
                 let win = betAmount * multipliers[10];
-                balance += win;
-                document.getElementById('balance').innerText = balance.toFixed(2);
+                
+                // Бурдро дар қуллаи бозӣ ба сервер илова мекунем
+                updateServerBalance(win);
+                
                 revealAllApples();
                 alert(`Поздравляем! Вы достигли вершины (x100)! Выигрыш: +${win.toFixed(2)} смн`);
                 gameStarted = false;
@@ -360,7 +379,6 @@
         });
     }
 
-    // --- Синхронизатсияи баланс бо сервери Render ---
     async function syncBalanceFromServer() {
         if (!userNumericId) return;
         try {
