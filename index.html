@@ -280,7 +280,7 @@
         if (!gameStarted) {
             betAmount = parseFloat(document.getElementById('betInput').value);
             
-            // Пеш аз оғоз санҷидани баланси воқеии сервер
+            // Пеш аз оғоз балансро аз сервер мегирем
             await syncBalanceFromServer();
             
             if (betAmount > balance) { 
@@ -289,7 +289,7 @@
                 return; 
             }
             
-            // Балансро дар сервер кам мекунем (бо аломати минус)
+            // Балансро дар сервер минус мекунем
             await updateServerBalance(-betAmount);
             
             gameStarted = true;
@@ -317,7 +317,7 @@
         } else {
             let win = betAmount * (currentRow > 0 ? multipliers[currentRow - 1] : multipliers[0]);
             
-            // Бурдро ба сервер илова мекунем (бо аломати мусбат)
+            // Бурдро ба сервер плюс мекунем
             await updateServerBalance(win);
             
             revealAllApples();
@@ -352,7 +352,7 @@
             } else {
                 let win = betAmount * multipliers[10];
                 
-                // Бурдро дар қуллаи бозӣ ба сервер илова мекунем
+                // Бурд дар қулларо ба сервер мефиристем
                 updateServerBalance(win);
                 
                 revealAllApples();
