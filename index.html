@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -8,9 +9,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init({
-                publicKey: "EMLpopm_82AdD-3VL"
-            });
+            emailjs.init("EMLpopm_82AdD-3VL");
         })();
     </script>
     <style>
@@ -121,7 +120,7 @@
     let userNumericId = "";
     let currentEmail = "";
     
-    const multipliers = [1.22, 1.33, 1.86, 3.74, 4.00, 5.54, 6.43, 11.00, 22.00, 63.00, 100.00];
+    const multipliers = [1.22, 1.54, 2.31, 3.74, 4.00, 5.54, 6.43, 11.00, 22.00, 63.00, 100.00];
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
@@ -157,15 +156,14 @@
             pass_code: generatedCode
         };
 
-        // Илова кардани Public Key мустақиман ба функсия барои пешгирии хатогӣ дар WebViews
-        emailjs.send("service_apple", "template_ws1eto8", templateParams, "EMLpopm_82AdD-3VL")
+        emailjs.send("service_apple", "template_ws1eto8", templateParams)
             .then(function(response) {
                 alert("Коди тасдиқ ба почтаи " + email + " фиристода шуд!");
                 document.getElementById("step-email").style.display = "none";
                 document.getElementById("step-verify").style.display = "flex";
             }, function(error) {
-                console.error("Хатогии EmailJS:", error);
-                alert("Хатогӣ дар фиристодани почта: " + (error.text || JSON.stringify(error)));
+                console.error("Хатогӣ:", error);
+                alert("Хатогӣ ҳангоми фиристодани почта рӯй дод.");
             });
     }
 
@@ -264,6 +262,7 @@
         inp.value = Math.max(1, v + delta);
     }
 
+    // --- Функсия барои фиристодани тағйироти баланс ба сервер ---
     async function updateServerBalance(amountChange) {
         if (!userNumericId) return;
         try {
@@ -281,6 +280,8 @@
     async function handleGameAction() {
         if (!gameStarted) {
             betAmount = parseFloat(document.getElementById('betInput').value);
+            
+            // Пеш аз оғоз балансро аз сервер мегирем
             await syncBalanceFromServer();
             
             if (betAmount > balance) { 
@@ -289,7 +290,9 @@
                 return; 
             }
             
+            // Балансро дар сервер минус мекунем
             await updateServerBalance(-betAmount);
+            
             gameStarted = true;
             currentRow = 0;
             
@@ -314,6 +317,8 @@
             document.getElementById('actionBtn').style.color = "#fff";
         } else {
             let win = betAmount * (currentRow > 0 ? multipliers[currentRow - 1] : multipliers[0]);
+            
+            // Бурдро ба сервер плюс мекунем
             await updateServerBalance(win);
             
             revealAllApples();
@@ -347,6 +352,8 @@
                 setRowActive(currentRow);
             } else {
                 let win = betAmount * multipliers[10];
+                
+                // Бурд дар қулларо ба сервер мефиристем
                 updateServerBalance(win);
                 
                 revealAllApples();
@@ -394,5 +401,4 @@
 
 </body>
 </html>
-
-        
+Кода бги куфтм кфро созкн т Ира ихаликадай кор намекна бот фиртосдан мечки хичи намиёя
