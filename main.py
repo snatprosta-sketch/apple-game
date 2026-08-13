@@ -173,12 +173,14 @@ def receive_withdraw_phone(message):
     phone = message.text.strip()
     data = user_data[user_id]
     game_id = data["game_id"]
-    amount = data["withdraw_amount"]
+    amount = float(data["withdraw_amount"])
     current_balance = get_balance(game_id)
     
     admin_markup = InlineKeyboardMarkup()
-    admin_markup.add(InlineKeyboardButton("✅ Тасдиқ", callback_data=f"approve_wd_{user_id}_{game_id}_{amount}"),
-                     InlineKeyboardButton("❌ Рад", callback_data=f"reject_wd_{user_id}"))
+    admin_markup.add(
+        InlineKeyboardButton("✅ Тасдиқ", callback_data=f"app_wd_{user_id}_{game_id}_{amount}"),
+        InlineKeyboardButton("❌ Рад", callback_data=f"rej_wd_{user_id}")
+    )
     
     bot.send_message(
         ADMIN_ID, 
@@ -207,34 +209,51 @@ def receive_photo(message):
     bot.reply_to(message, "✅ Чек фиристода шуд, интизор шавед.")
     user_data.pop(user_id, None)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith(("approve_", "reject_")))
+@bot.callback_query_handler(func=lambda call: True)
 def admin_decision(call):
-    if call.from_user.id != ADMIN_ID: return
-    parts = call.data.split("_")
+    if call.from_user.id != ADMIN_ID: 
+        return
     
-    if parts[1] == "wd":
+    data = call.data
+    parts = data.split("_")
+    
+    # Коркарди вывод (Approve / Reject withdraw)
+    if len(parts) >= 3 and parts[1] == "wd":
         action = parts[0]
         user_id = int(parts[2])
-        if action == "approve":
+        
+        if action == "app":
             game_id = parts[3]
             amount = float(parts[4])
-            if get_balance(game_id) >= amount:
+            
+            current_bal = get_balance(game_id)
+            if current_bal >= amount:
+                # Маҳз ҳамон миқдори дархостшударо аз баланс кам мекунем (-amount)
                 update_balance(game_id, -amount)
-            bot.send_message(user_id, f"✅ Вывод ({amount} смн) тасдиқ шуд!")
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=call.message.caption + "\n\n✅ ВЫВОД ТАСДИҚ ШУД")
-        else:
+                bot.send_message(user_id, f"✅ Вывод ({amount} смн) тасдиқ шуд!")
+                new_caption = (call.message.caption or "") + f"\n\n✅ ВЫВОД ТАСДИҚ ШУД (-{amount} смн)"
+                bot.edit_message_caption(chat_id=ADMIN_ID, message_id=call.message.message_id, caption=new_caption)
+            else:
+                bot.answer_callback_query(call.id, "❌ Хатогӣ: Баланси бозингар кам аст!", show_alert=True)
+        elif action == "rej":
             bot.send_message(user_id, "❌ Вывод рад шуд.")
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=call.message.caption + "\n\n❌ ВЫВОД РАД ШУД")
+            new_caption = (call.message.caption or "") + "\n\n❌ ВЫВОД РАД ШУД"
+            bot.edit_message_caption(chat_id=ADMIN_ID, message_id=call.message.message_id, caption=new_caption)
         return
 
-    action, user_id = parts[0], int(parts[1])
-    if action == "approve":
-        game_id = parts[2]
-        admin_state[ADMIN_ID] = {"target_user_id": user_id, "game_id": game_id, "message_id": call.message.message_id}
-        bot.send_message(ADMIN_ID, f"✍️ Миқдори маблағро барои ID {game_id} нависед:")
-    else:
-        bot.send_message(user_id, "❌ Чек рад карда шуд.")
-        bot.edit_message_caption(chat_id=ADMIN_ID, message_id=call.message.message_id, caption=call.message.caption + "\n\n❌ РАД ШУД")
+    # Коркарди чекҳо (Deposit)
+    if len(parts) >= 2:
+        action, user_id = parts[0], int(parts[1])
+        if action == "approve":
+            game_id = parts[2]
+            admin_state[ADMIN_ID] = {"target_user_id": user_id, "game_id": game_id, "message_id": call.message.message_id}
+            bot.send_message(ADMIN_ID, f"✍️ Миқдори маблағро барои ID {game_id} нависед:")
+        elif action == "reject":
+            bot.send_message(user_id, "❌ Чек рад карда шуд.")
+            try:
+                bot.edit_message_caption(chat_id=ADMIN_ID, message_id=call.message.message_id, caption=(call.message.caption or "") + "\n\n❌ РАД ШУД")
+            except:
+                pass
 
 @bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and ADMIN_ID in admin_state)
 def admin_enter_amount(message):
@@ -251,10 +270,9 @@ def admin_enter_amount(message):
     
     bot.send_message(state["target_user_id"], f"🎉 Чек тасдиқ шуд! {amount} сомонӣ илова гардид.")
     try:
-        bot.edit_message_caption(chat_id=ADMIN_ID, message_id=state["message_id"], caption=f"✅ ТАСДИҚ ШУД: {amount} сомонӣ")
+        bot.edit_message_caption(chat_id=ADMIN_ID, message_id=state["message_id"], caption=(bot.get_chat(ADMIN_ID) and state.get("message_id") and "✅ ТАСДИҚ ШУД: " + str(amount) + " сомонӣ"))
     except:
         pass
     bot.reply_to(message, "✅ Баланс бо муваффақият нав карда шуд!")
 
-bot.polling(none_stop=True)
-        
+bot.infinity_polling(none_stop=True)
