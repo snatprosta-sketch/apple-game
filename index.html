@@ -1,11 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Apple v2</title>
-    <!-- Китобхонаи EmailJS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
@@ -29,17 +27,33 @@
         .balance-badge { background: #0f141f; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; color: #22c55e; border: 1px solid #2a3b5c; }
         .top_up_btn { background: #38bdf8; color: #0b0f19; border: none; width: 26px; height: 26px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
         
-        .game-card { background: #1c2538; border-radius: 14px; padding: 10px; border: 1px solid #2a3b5c; display: flex; flex-direction: column; gap: 5px; max-height: 52vh; overflow-y: auto; }
+        .game-card { background: #1c2538; border-radius: 14px; padding: 10px; border: 1px solid #2a3b5c; display: flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow-y: auto; }
         
-        .row-level { display: flex; align-items: center; justify-content: space-between; background: #0f141f; padding: 4px 8px; border-radius: 8px; border: 1px solid #2a3b5c; transition: 0.2s; }
-        .row-mult { font-size: 12px; font-weight: bold; color: #38bdf8; width: 55px; }
+        .row-level { display: flex; align-items: center; justify-content: space-between; background: #0f141f; padding: 6px 10px; border-radius: 10px; border: 1px solid #2a3b5c; transition: 0.2s; }
+        .row-mult { font-size: 13px; font-weight: bold; color: #38bdf8; width: 60px; }
         .row-mult.high { color: #ffc107; }
         
-        .apples-container { display: flex; gap: 5px; flex: 1; justify-content: center; }
-        .apple-box { width: 28px; height: 28px; background: #1c2538; border: 1px solid #2a3b5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .apple-box.active { border-color: #ffc107; background: #2a3b5c; box-shadow: 0 0 6px rgba(255,193,7,0.4); }
-        .apple-box.win { border-color: #22c55e; background: #064e3b; }
-        .apple-box.lose { border-color: #ef4444; background: #7f1d1d; }
+        .apples-container { display: flex; gap: 8px; flex: 1; justify-content: center; }
+        
+        /* Тугмаҳои калон ва гирд бо аломати ? */
+        .apple-box { 
+            width: 38px; 
+            height: 38px; 
+            background: #1c2538; 
+            border: 2px solid #2a3b5c; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 16px; 
+            font-weight: bold;
+            color: #ffc107;
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        .apple-box.active { border-color: #ffc107; background: #2a3b5c; box-shadow: 0 0 8px rgba(255,193,7,0.5); }
+        .apple-box.win { border-color: #22c55e; background: #064e3b; color: #22c55e; }
+        .apple-box.lose { border-color: #ef4444; background: #7f1d1d; color: #ef4444; }
         .apple-box.revealed { opacity: 0.7; }
 
         .card { background: #1c2538; border-radius: 14px; padding: 12px; border: 1px solid #2a3b5c; margin-bottom: 5px; }
@@ -59,7 +73,6 @@
 <body>
 
 <div class="container">
-    <!-- ҚИСМИ 1: БАҚАЙДГИРӢ -->
     <div id="auth-container" class="container">
         <div class="auth-card" id="step-email">
             <div class="auth-title">🍎 Apple v2 - Регистратсия</div>
@@ -76,7 +89,6 @@
         </div>
     </div>
 
-    <!-- ҚИСМИ 2: ХУДИ БОЗӢ -->
     <div id="game-main-container" style="display: none; width: 100%; flex-direction: column; gap: 10px;">
         <div class="top-bar">
             <div class="brand-title">🍎 Apple v2</div>
@@ -230,7 +242,7 @@
             for (let j = 0; j < 5; j++) {
                 let box = document.createElement('div');
                 box.className = 'apple-box';
-                box.innerText = '🍎';
+                box.innerText = '?'; // Аломати савол
                 box.onclick = () => chooseApple(i, j);
                 applesDiv.appendChild(box);
                 boxes.push({ element: box, hasWorm: false });
@@ -306,7 +318,7 @@
 
                 row.boxes.forEach((b, idx) => {
                     b.hasWorm = wormIndices.includes(idx);
-                    b.element.innerText = '🍎';
+                    b.element.innerText = '?'; // Аломати савол
                     b.element.className = 'apple-box';
                 });
             });
@@ -357,7 +369,7 @@
                 updateServerBalance(win);
                 
                 revealAllApples();
-                alert(`Поздравляем! Вы достигли вершины (x100)! Выигрыш: +${win.toFixed(2)} смн`);
+                alert(`Поздравляем! Вы достигли вершины (x150)! Выигрыш: +${win.toFixed(2)} смн`);
                 gameStarted = false;
                 document.getElementById('actionBtn').innerText = "СДЕЛАТЬ СТАВКУ";
                 document.getElementById('actionBtn').style.background = "linear-gradient(135deg, #ffc107, #e0a800)";
