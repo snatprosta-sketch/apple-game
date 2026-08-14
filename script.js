@@ -287,8 +287,11 @@ function revealAllApples() {
 async function syncBalanceFromServer() {
     if (!userNumericId) return;
     try {
+        console.log("Талоши гирифтани баланс барои ID:", userNumericId); // Лог илова кардем
         const res = await fetch(`${SERVER_URL}/balance?game_id=${userNumericId}`);
         const data = await res.json();
+        
+        console.log("Ҷавоби сервер:", data); // Инро дар Консоль мебинед
         
         if (data && typeof data.balance !== 'undefined') {
             balance = Number(data.balance);
@@ -301,4 +304,3 @@ async function syncBalanceFromServer() {
         console.error("Хатогӣ дар гирифтани баланс:", e);
     }
 }
-    
