@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apple v2</title>
+    <title>Apple v2 - Бозии онлайнӣ</title>
+    <!-- Китобхонаи EmailJS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
@@ -13,9 +14,26 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: #0b0f19; color: #f8fafc; padding: 15px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; }
-        .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
+        .app-container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Услубҳои қисми бақайдгирӣ */
+        /* Услубҳои Лендинг (Саҳифаи муқаддимавӣ) */
+        .landing-card { background: #1c2538; border-radius: 20px; padding: 25px 20px; border: 1px solid #2a3b5c; display: flex; flex-direction: column; align-items: center; gap: 15px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .landing-logo { font-size: 50px; margin-bottom: -5px; }
+        .landing-title { font-size: 24px; font-weight: bold; color: #ffc107; }
+        .landing-subtitle { font-size: 14px; color: #94a3b8; line-height: 1.5; }
+        
+        .btn-primary { background: linear-gradient(135deg, #ffc107, #e0a800); color: #0f141f; border: none; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; text-decoration: none; box-shadow: 0 4px 15px rgba(255,193,7,0.4); transition: 0.2s; display: inline-block; text-align: center; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .features { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .feature-card { background: #1c2538; border-radius: 12px; padding: 15px; border: 1px solid #2a3b5c; display: flex; align-items: center; gap: 15px; text-align: left; }
+        .feature-icon { font-size: 24px; background: #0f141f; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #2a3b5c; flex-shrink: 0; }
+        .feature-text h3 { font-size: 15px; color: #ffc107; margin-bottom: 3px; }
+        .feature-text p { font-size: 12px; color: #94a3b8; }
+
+        .footer { font-size: 12px; color: #64748b; text-align: center; margin-top: 5px; }
+
+        /* Услубҳои қисми бақайдгирӣ ва бозӣ */
         .auth-card { background: #1c2538; border-radius: 14px; padding: 20px; border: 1px solid #2a3b5c; display: flex; flex-direction: column; gap: 12px; text-align: center; }
         .auth-title { font-size: 18px; font-weight: bold; color: #ffc107; margin-bottom: 5px; }
         .auth-input { width: 100%; background: #0f141f; border: 1px solid #2a3b5c; border-radius: 8px; color: white; font-size: 14px; padding: 10px; outline: none; text-align: center; }
@@ -35,7 +53,6 @@
         
         .apples-container { display: flex; gap: 8px; flex: 1; justify-content: center; }
         
-        /* Тугмаҳои калон ва гирд бо аломати ? */
         .apple-box { 
             width: 38px; 
             height: 38px; 
@@ -72,8 +89,47 @@
 </head>
 <body>
 
-<div class="container">
-    <div id="auth-container" class="container">
+<div class="app-container">
+    <!-- ҚИСМИ 0: ЛЕНДИНГ (Саҳифаи муқаддимавӣ) -->
+    <div id="landing-container" class="app-container">
+        <div class="landing-card">
+            <div class="landing-logo">🍎</div>
+            <div class="landing-title">Apple v2 Online</div>
+            <p class="landing-subtitle">Шанси худро дар бозии ҳаяҷонбахши себҳо санҷед! Коэффициентҳо то x150 мерасанд, бурд кунед ва маблағи худро ба таври осон бароред.</p>
+            <button class="btn-primary" onclick="goToGame()">БОЗӢ КАРДАН / ОҒОЗ</button>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-text">
+                    <h3>Коэффициентҳои баланд</h3>
+                    <p>Аз x1.22 то x150 дар ҳар як қадами бозӣ баланд шавед.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">
+                    <h3>Амнистия ва Бехатарӣ</h3>
+                    <p>Бақайдгирии осон тавассути почтаи электронӣ ва муҳофизати ID рақамӣ.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💳</div>
+                <div class="feature-text">
+                    <h3>Пуркунӣ ва Барориш</h3>
+                    <p>Идоракунии пурраи баланс тавассути боти махсуси Telegram дар чанд сония.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 Apple v2. Ҳамаи ҳуқуқҳо ҳифз шудаанд.
+        </div>
+    </div>
+
+    <!-- ҚИСМИ 1: БАҚАЙДГИРӢ -->
+    <div id="auth-container" class="app-container" style="display: none;">
         <div class="auth-card" id="step-email">
             <div class="auth-title">🍎 Apple v2 - Регистратсия</div>
             <p style="font-size: 13px; color: #94a3b8;">Лутфан почтаи электронии худро нависед то коди тасдиқ фиристода шавад.</p>
@@ -89,6 +145,7 @@
         </div>
     </div>
 
+    <!-- ҚИСМИ 2: ХУДИ БОЗӢ -->
     <div id="game-main-container" style="display: none; width: 100%; flex-direction: column; gap: 10px;">
         <div class="top-bar">
             <div class="brand-title">🍎 Apple v2</div>
@@ -136,22 +193,24 @@
     const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
     let rowStates = [];
 
-    window.addEventListener('DOMContentLoaded', () => {
+    function goToGame() {
         let savedEmail = localStorage.getItem('apple_registered_email');
         let savedId = localStorage.getItem('apple_numeric_id');
+
+        document.getElementById("landing-container").style.display = "none";
+
         if (savedEmail && savedId) {
             currentEmail = savedEmail;
             userNumericId = savedId;
-            localStorage.setItem('apple_numeric_id', userNumericId);
-            
-            document.getElementById("auth-container").style.display = "none";
             document.getElementById("game-main-container").style.display = "flex";
             document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
             initRows();
             syncBalanceFromServer();
             setInterval(syncBalanceFromServer, 2000);
+        } else {
+            document.getElementById("auth-container").style.display = "flex";
         }
-    });
+    }
 
     function sendVerificationCode() {
         const email = document.getElementById("userEmail").value.trim();
@@ -242,7 +301,7 @@
             for (let j = 0; j < 5; j++) {
                 let box = document.createElement('div');
                 box.className = 'apple-box';
-                box.innerText = '?'; // Аломати савол
+                box.innerText = '?';
                 box.onclick = () => chooseApple(i, j);
                 applesDiv.appendChild(box);
                 boxes.push({ element: box, hasWorm: false });
@@ -274,7 +333,6 @@
         inp.value = Math.max(1, v + delta);
     }
 
-    // --- Функсия барои фиристодани тағйироти баланс ба сервер ---
     async function updateServerBalance(amountChange) {
         if (!userNumericId) return;
         try {
@@ -292,8 +350,6 @@
     async function handleGameAction() {
         if (!gameStarted) {
             betAmount = parseFloat(document.getElementById('betInput').value);
-            
-            // Пеш аз оғоз балансро аз сервер мегирем
             await syncBalanceFromServer();
             
             if (betAmount > balance) { 
@@ -302,7 +358,6 @@
                 return; 
             }
             
-            // Балансро дар сервер минус мекунем
             await updateServerBalance(-betAmount);
             
             gameStarted = true;
@@ -318,7 +373,7 @@
 
                 row.boxes.forEach((b, idx) => {
                     b.hasWorm = wormIndices.includes(idx);
-                    b.element.innerText = '?'; // Аломати савол
+                    b.element.innerText = '?';
                     b.element.className = 'apple-box';
                 });
             });
@@ -329,8 +384,6 @@
             document.getElementById('actionBtn').style.color = "#fff";
         } else {
             let win = betAmount * (currentRow > 0 ? multipliers[currentRow - 1] : multipliers[0]);
-            
-            // Бурдро ба сервер плюс мекунем
             await updateServerBalance(win);
             
             revealAllApples();
@@ -350,66 +403,4 @@
             box.element.innerText = '💀';
             box.element.className = 'apple-box lose';
             revealAllApples();
-            alert("Попался червивый себ! Вы проиграли ставку.");
-            gameStarted = false;
-            document.getElementById('actionBtn').innerText = "СДЕЛАТЬ СТАВКУ";
-            document.getElementById('actionBtn').style.background = "linear-gradient(135deg, #ffc107, #e0a800)";
-            document.getElementById('actionBtn').style.color = "#0f141f";
-        } else {
-            box.element.innerText = '🍏';
-            box.element.className = 'apple-box win';
-            
-            if (rowIdx < 10) {
-                currentRow = rowIdx + 1;
-                setRowActive(currentRow);
-            } else {
-                let win = betAmount * multipliers[10];
-                
-                // Бурд дар қулларо ба сервер мефиристем
-                updateServerBalance(win);
-                
-                revealAllApples();
-                alert(`Поздравляем! Вы достигли вершины (x150)! Выигрыш: +${win.toFixed(2)} смн`);
-                gameStarted = false;
-                document.getElementById('actionBtn').innerText = "СДЕЛАТЬ СТАВКУ";
-                document.getElementById('actionBtn').style.background = "linear-gradient(135deg, #ffc107, #e0a800)";
-                document.getElementById('actionBtn').style.color = "#0f141f";
-            }
-        }
-    }
-
-    function revealAllApples() {
-        rowStates.forEach(row => {
-            row.boxes.forEach(b => {
-                if(b.hasWorm) {
-                    b.element.innerText = '💀';
-                    if(!b.element.classList.contains('lose')) b.element.classList.add('revealed');
-                } else {
-                    b.element.innerText = '🍏';
-                    if(!b.element.classList.contains('win')) b.element.classList.add('revealed');
-                }
-            });
-        });
-    }
-
-    async function syncBalanceFromServer() {
-        if (!userNumericId) return;
-        try {
-            const res = await fetch(`${SERVER_URL}/balance?game_id=${userNumericId}`);
-            const data = await res.json();
-            
-            if (data && typeof data.balance !== 'undefined') {
-                balance = Number(data.balance);
-                const balanceEl = document.getElementById('balance');
-                if (balanceEl) {
-                    balanceEl.innerText = balance.toFixed(2);
-                }
-            }
-        } catch (e) {
-            console.error("Хатогӣ дар гирифтани баланс:", e);
-        }
-    }
-</script>
-
-</body>
-</html>
+    
