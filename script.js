@@ -8,7 +8,7 @@ let betAmount = 10;
 let userNumericId = "";
 let currentEmail = "";
 
-const multipliers = [1.22, 1.44, 1.86, 3.51, 4.03, 5.51, 6.43, 11.00, 22.00, 63.00, 150.00];
+const multipliers = [1.22, 1.50, 1.96, 3.17, 4.03, 5.51, 6.43, 11.00, 22.00, 63.00, 150.00];
 const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
 let rowStates = [];
 
