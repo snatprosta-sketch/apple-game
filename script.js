@@ -12,21 +12,43 @@ const multipliers = [1.22, 1.44, 1.86, 3.51, 4.03, 5.51, 6.43, 11.00, 22.00, 63.
 const wormCounts = [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
 let rowStates = [];
 
+// Авто-санҷиш ҳангоми кушодани сайт
+window.onload = function() {
+    let savedEmail = localStorage.getItem('apple_registered_email');
+    let savedId = localStorage.getItem('apple_numeric_id');
+
+    // Агар корбар аллакай сабти ном шуда бошад, бозиро фавран мекушоем
+    if (savedEmail && savedId) {
+        document.getElementById("landing-container").style.display = "none";
+        document.getElementById("game-main-container").style.display = "flex";
+        
+        currentEmail = savedEmail;
+        userNumericId = savedId;
+        document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
+        
+        initRows();
+        syncBalanceFromServer();
+        setInterval(syncBalanceFromServer, 2000);
+    }
+};
+
 function goToGame() {
     let savedEmail = localStorage.getItem('apple_registered_email');
     let savedId = localStorage.getItem('apple_numeric_id');
 
     document.getElementById("landing-container").style.display = "none";
 
+    // Агар сабти ном шуда бошад, бозиро мекушоем
     if (savedEmail && savedId) {
+        document.getElementById("game-main-container").style.display = "flex";
         currentEmail = savedEmail;
         userNumericId = savedId;
-        document.getElementById("game-main-container").style.display = "flex";
         document.getElementById('userIdDisplay').innerText = `ID рақамӣ: ${userNumericId} (${currentEmail})`;
         initRows();
         syncBalanceFromServer();
         setInterval(syncBalanceFromServer, 2000);
     } else {
+        // Агар сабти ном нашуда бошад, саҳифаи регистратсияро нишон медиҳем
         document.getElementById("auth-container").style.display = "flex";
     }
 }
@@ -279,3 +301,4 @@ async function syncBalanceFromServer() {
         console.error("Хатогӣ дар гирифтани баланс:", e);
     }
 }
+    
